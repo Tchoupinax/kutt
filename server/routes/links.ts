@@ -7,7 +7,7 @@ import * as helpers from "../handlers/helpers";
 import * as link from "../handlers/links";
 import * as auth from "../handlers/auth";
 import env from "../env";
-import { linkCounterMiddleware } from "../metrics/response-duration.middleware";
+import { linkCounterMiddleware } from "../metrics/link-counter.middleware";
 
 const router = Router();
 
