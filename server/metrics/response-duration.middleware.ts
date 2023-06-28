@@ -1,5 +1,5 @@
-import { Handler, Request, Response } from "express";
-import { Histogram } from "prom-client";
+import { Handler, NextFunction, Request, Response } from "express";
+import { Histogram, Counter } from "prom-client";
 import { register } from "../routes/metrics";
 
 const responseDurationHistogram: Histogram = new Histogram({
@@ -8,6 +8,13 @@ const responseDurationHistogram: Histogram = new Histogram({
   labelNames: ["method", "path", "status"],
   registers: [register]
 });
+
+const linkCounter = new Counter({
+  name: 'link_counter',
+  help: 'Number of link created',
+  labelNames: ['links'],
+  registers: [register]
+})
 
 export const responseDurationMiddleware: Handler = (
   req: Request, res: Response, next
@@ -26,3 +33,14 @@ export const responseDurationMiddleware: Handler = (
 
   next();
 };
+
+export const linkCounterMiddleware: Handler = (
+  _req: Request, res: Response, next: NextFunction,
+) => {
+  res.on("close", () => {
+    if ([200, 201].includes(res.statusCode)) {
+      linkCounter.inc(1);
+    }
+  })
+  next();
+}
